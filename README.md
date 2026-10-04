@@ -254,6 +254,19 @@ CLI 会直接拒绝启动(`profile "desktop" is managed exclusively by the Elect
 
 CI(`.github/workflows/test.yml`)在 Linux + Windows、Node 22.13 / 24 上跑同一套测试。
 
+> **CI 目前未启用。** 工作流文件已就位,但 GitHub 拒绝用当前凭据推送它 ——
+> 推送 workflow 需要 token 具备 `workflow` scope,而 gh 的 OAuth 凭据没有
+> (`refusing to allow an OAuth App to create or update workflow … without 'workflow' scope`)。
+> 启用方式:执行一次 `gh auth refresh -h github.com -s workflow`(浏览器里点一下授权),
+> 然后把这个文件加进版本控制:
+>
+> ```sh
+> git add -f .github/workflows/test.yml .gitignore   # .gitignore 里 .github/ 那一行顺手删掉
+> git commit -m "ci: enable the test workflow" && git push
+> ```
+>
+> 工作流本身不依赖本机环境:装 `schemastery` + 复制 `test/stubs/dsh-tools` 替身后直接跑 `npm test`。
+
 目录结构:
 
 ```
@@ -271,6 +284,7 @@ test/stubs/       @deepseek-ai/dsh-tools 的测试替身(见 5.0)
 scripts/          dev-setup.mjs 本地依赖引导;add-to-profile.mjs 写入 desktop profile 清单
 verify-boot.mjs   真机装载验证(可选)
 verify-patch.yml  验证时用的配置覆盖层
+.github/          test.yml 工作流(待 workflow scope 后纳入版本控制,见 5.1)
 ```
 
 `verify-boot.mjs` 用 `DSH_HOME` 定位 profile(未设置时按主目录推导),必要时可显式指定:
