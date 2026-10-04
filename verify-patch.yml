@@ -1,0 +1,13 @@
+# 临时验证层:只覆盖 dsh-siyuan-api 这一行的配置,不改用户的 package.json。
+# 该行由 web profile 的 bundles 列表(或本包自带的 bundle patch)插入,
+# 这里按 id 定向覆盖配置,不再重复 insert(重复 id 会撞 cordis 的行唯一性校验)。
+#
+# 地址与 Token 从环境变量读,由 verify-boot.mjs 注入 —— 脚本里不落盘任何 Token。
+# 用法:node verify-boot.mjs
+- id: dsh-siyuan-api
+  name: dsh-siyuan-api
+  config:
+    apiUrl: !!js process.env.SIYUAN_VERIFY_URL || 'http://127.0.0.1:19406'
+    token: !!js process.env.SIYUAN_VERIFY_TOKEN || ''
+    maxRows: 32
+    debug: true

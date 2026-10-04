@@ -1,0 +1,22 @@
+# 依赖(由 dsh 宿主提供,不提交)
+node_modules/
+.pnpm-store/
+
+# 打包产物(本地安装用的 tarball,用 pnpm pack 现场生成)
+*.tgz
+
+# 验证脚本的运行态输出
+verify-kernel.json
+
+# 编辑器 / 系统
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+npm-debug.log*
+pnpm-debug.log*

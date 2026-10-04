@@ -1,0 +1,59 @@
+{
+  "name": "dsh-siyuan-api",
+  "version": "0.1.4",
+  "description": "DeepSeek Harness 思源笔记(SiYuan)插件:通过内核 HTTP API 搜索笔记、创建文档、读取与追加块内容,并支持只读 SQL 查询。",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "docs",
+    "lib",
+    "scripts",
+    "test",
+    "cordis.patch.yml",
+    "README.md",
+    "verify-boot.mjs",
+    "verify-patch.yml"
+  ],
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "siyuan",
+    "notes",
+    "knowledge-base",
+    "sql"
+  ],
+  "license": "MIT",
+  "author": "SherinG-official",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SherinG-official/dsh-siyuan-api.git"
+  },
+  "homepage": "https://github.com/SherinG-official/dsh-siyuan-api#readme",
+  "bugs": {
+    "url": "https://github.com/SherinG-official/dsh-siyuan-api/issues"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/schemastery": "^3.18.2"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/schemastery": {
+      "optional": true
+    }
+  }
+}

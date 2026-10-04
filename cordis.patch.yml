@@ -1,0 +1,12 @@
+# dsh-siyuan-api bundle layer: 把思源笔记插件挂进 cordis 树。
+#
+# 这是本包的 `dsh.bundle.patch` 层(package.json#dsh.bundle.patch),
+# 由 profile 的 `dsh.profile.bundles` 列表引入。层语义:YAML 数组,元素是
+# 行操作动词;`insert` 往组合配置里插入插件行。
+#
+# id   : 行标识,后续层用它做覆盖/禁用(例如在 profile 的 cordis.patch.yml 里
+#        写 `- id: dsh-siyuan-api` + `config:` 来覆盖配置)。
+# name : 载入的模块名,经 node 解析到本包的 package.json#main(lib/index.js)。
+- insert:
+    - id: dsh-siyuan-api
+      name: dsh-siyuan-api
