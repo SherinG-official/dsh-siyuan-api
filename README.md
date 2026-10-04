@@ -2,7 +2,7 @@
 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![node](https://img.shields.io/badge/node-%3E%3D22.13-339933.svg)](package.json)
-[![tests](https://img.shields.io/badge/tests-51%20passing-brightgreen.svg)](test/)
+[![tests](https://img.shields.io/badge/tests-61%20passing-brightgreen.svg)](test/)
 
 让 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)(dsh)直接读写
 [思源笔记](https://b3log.org/siyuan/)(SiYuan)的插件。
@@ -214,8 +214,29 @@ SELECT id, hpath, content FROM blocks WHERE type = 'p' AND content LIKE '%TODO%'
 
 ## 5. 开发
 
+### 5.0 准备本地依赖
+
+本仓库**不提交 `node_modules`**,但测试需要两个宿主包能被解析。一条命令搞定:
+
 ```sh
-# 单元测试 + 端到端(假内核,不需要真思源)
+node scripts/dev-setup.mjs
+```
+
+它会:检查 `@deepseek-ai/schemastery`(缺了会提示你 `npm install --no-save`),
+并把 `@deepseek-ai/dsh-tools` 就位 —— 优先**链接本机 dsh 自带的真包**,
+找不到就退回复制 `test/stubs/dsh-tools` 里的替身(`--stub` 可强制走替身)。
+
+为什么不是直接 `npm i @deepseek-ai/dsh-tools`:它运行时真的会 `import '@deepseek-ai/cordis'`,
+而每个 npm 版本都声明了一长串 `@deepseek-ai/dsh-*` peer 依赖,装它等于把整棵 dsh 依赖树拉下来。
+替身只实现本插件依赖的部分,但**编译规则与参数校验都照宿主实现** ——
+作者侧的 `required: true` 会被编译成根节点的 `required: [...]` 数组,
+`test/schema.test.mjs` 断言的正是这份「模型实际收到的 JSON Schema」。
+替身与真包两条路都跑过,61 条测试结果一致。
+
+### 5.1 跑验证
+
+```sh
+# 61 条测试:客户端、SQL 防护、工具端到端(真 HTTP 假内核)、诊断路由、参数契约
 node --test "test/*.test.mjs"
 
 # 真启动一个 dsh 实例验证插件装载(独立假内核 + 独立端口,不动你正在用的 GUI)
@@ -226,6 +247,12 @@ node verify-boot.mjs --profile web --port 19401
 启动 `dsh --profile <p> --port <n> --no-open` → 请求插件的诊断路由 →
 核对「5 个工具都注册了 + 内核可达」。这是**真机装载**验证,能抓出单测抓不到的问题
 (比如上面那条 `without inject` 的装载崩溃,就是它发现的)。
+
+目标 profile 里得先装好本插件,而且**不能是 `desktop`** —— 那个 profile 由 Electron 独占,
+CLI 会直接拒绝启动(`profile "desktop" is managed exclusively by the Electron application`)。
+用 `web` 或自建 profile 验证的是同一条代码路径。
+
+CI(`.github/workflows/test.yml`)在 Linux + Windows、Node 22.13 / 24 上跑同一套测试。
 
 目录结构:
 
@@ -239,8 +266,9 @@ lib/
   route.js        /dsh-siyuan-api/status 诊断路由(延迟注入 webServer)
   tools/          五个工具的 defineTool 声明
 docs/             思源内核 HTTP API 实现参考(字段级,含版本矩阵)
-test/             客户端 / SQL / 工具 / 诊断路由的测试
-scripts/          add-to-profile.mjs:往 desktop profile 清单里写插件行
+test/             客户端 / SQL / 工具 / 诊断路由 / 参数契约的测试
+test/stubs/       @deepseek-ai/dsh-tools 的测试替身(见 5.0)
+scripts/          dev-setup.mjs 本地依赖引导;add-to-profile.mjs 写入 desktop profile 清单
 verify-boot.mjs   真机装载验证(可选)
 verify-patch.yml  验证时用的配置覆盖层
 ```
@@ -255,7 +283,7 @@ node <pnpm> pack --pack-destination C:/somewhere/no-spaces
 cd "$DSH_HOME/profiles/<p>" && pnpm install --force   # 同版本 tarball 需要强制重装
 ```
 
-### 5.1 内核接口参考
+### 5.2 内核接口参考
 
 [docs/siyuan-kernel-api-reference.md](docs/siyuan-kernel-api-reference.md) 是思源内核 HTTP API 的字段级参考
 (约 1120 行,对着 **v3.8.6 源码**逐条核对):鉴权矩阵、响应信封约定、端点清单、`blocks` 等表的完整列名、

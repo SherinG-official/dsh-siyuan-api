@@ -8,6 +8,11 @@ node_modules/
 # 验证脚本的运行态输出
 verify-kernel.json
 
+# GitHub Actions 工作流:推送 workflow 文件需要 token 具备 `workflow` scope,
+# 当前 gh 凭据没有该 scope(GitHub 会拒绝整次 push),所以暂时不跟踪。
+# 启用方式:gh auth refresh -h github.com -s workflow,然后删掉这一行重新提交。
+.github/
+
 # 编辑器 / 系统
 .vscode/*
 !.vscode/extensions.json
